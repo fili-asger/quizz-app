@@ -1,4 +1,1 @@
 # quizz-app
-
-
-Hello
