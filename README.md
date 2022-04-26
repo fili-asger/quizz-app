@@ -19,3 +19,5 @@
 
 ### Hard 🔴 
 - Create a **live leaderboard** of users using a backend (Firebase, AWS, etc.)
+
+## Fetch API
