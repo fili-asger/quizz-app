@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./App.css";
 
 function App() {
@@ -7,53 +7,47 @@ function App() {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [score, setScore] = useState(0);
 
-  const questions = [
-    {
-      text: "What is the capital of America?",
-      options: [
-        { id: 0, text: "New York City", isCorrect: false },
-        { id: 1, text: "Boston", isCorrect: false },
-        { id: 2, text: "Santa Fe", isCorrect: false },
-        { id: 3, text: "Washington DC", isCorrect: true },
-      ],
-    },
-    {
-      text: "What year was the Constitution of America written?",
-      options: [
-        { id: 0, text: "1787", isCorrect: true },
-        { id: 1, text: "1776", isCorrect: false },
-        { id: 2, text: "1774", isCorrect: false },
-        { id: 3, text: "1826", isCorrect: false },
-      ],
-    },
-    {
-      text: "Who was the second president of the US?",
-      options: [
-        { id: 0, text: "John Adams", isCorrect: true },
-        { id: 1, text: "Paul Revere", isCorrect: false },
-        { id: 2, text: "Thomas Jefferson", isCorrect: false },
-        { id: 3, text: "Benjamin Franklin", isCorrect: false },
-      ],
-    },
-    {
-      text: "What is the largest state in the US?",
-      options: [
-        { id: 0, text: "California", isCorrect: false },
-        { id: 1, text: "Alaska", isCorrect: true },
-        { id: 2, text: "Texas", isCorrect: false },
-        { id: 3, text: "Montana", isCorrect: false },
-      ],
-    },
-    {
-      text: "Which of the following countries DO NOT border the US?",
-      options: [
-        { id: 0, text: "Canada", isCorrect: false },
-        { id: 1, text: "Russia", isCorrect: true },
-        { id: 2, text: "Cuba", isCorrect: true },
-        { id: 3, text: "Mexico", isCorrect: false },
-      ],
-    },
-  ];
+  useEffect(() => {
+    getTrivia();
+  }, []);
+
+  let questions = [];
+
+  let question = class {
+    constructor(question, correct_answer, incorrect_answers) {
+      this.question = question;
+      this.correct_answer = correct_answer;
+      this.incorrect_answers = incorrect_answers;
+    }
+  };
+
+  /* Question format */
+  var firstQuestion = new question("Test", "Bruce Wayne", [
+    "Clark Kent",
+    "Barry Allen",
+    "Tony Stark"
+  ]);
+
+
+  /*
+  Foreach loop over the JSON data
+  Create question object for each question in the reponse.
+  Display the current question and listen for input.
+
+  */
+
+  const getTrivia = async () => {
+    let response = await fetch("https://opentdb.com/api.php?amount=10&category=29&difficulty=easy&type=multiple");
+    let data = await response.json();
+    return data;
+  }
+
+  getTrivia().then((data) => data.results.forEach(result => {
+    let newQuestion = new question(result.question, result.correct_answer, result.incorrect_answers)
+    questions.push(newQuestion);
+  }));
+
+  console.log(questions[2]);
 
   // Helper Functions
 
@@ -64,7 +58,8 @@ function App() {
       setScore(score + 1);
     }
 
-    if (currentQuestion + 1 < questions.length) {
+    if (currentQuestion + 1 < 10) {
+      console.log(questions);
       setCurrentQuestion(currentQuestion + 1);
     } else {
       setShowResults(true);
@@ -92,37 +87,49 @@ function App() {
         <div className="final-results">
           <h1>Final Results</h1>
           <h2>
-            {score} out of {questions.length} correct - (
-            {(score / questions.length) * 100}%)
+            {score} out of {10} correct - (
+            {(score / 10) * 100}%)
           </h2>
           <button onClick={() => restartGame()}>Restart game</button>
         </div>
       ) : (
-        /* 5. Question Card  */
-        <div className="question-card">
-          {/* Current Question  */}
-          <h2>
-            Question: {currentQuestion + 1} out of {questions.length}
-          </h2>
-          <h3 className="question-text">{questions[currentQuestion].text}</h3>
+          /* 5. Question Card  */
+          <div className="question-card">
+            {/* Current Question  */}
+            <h2>
+              Question: {currentQuestion + 1} out of {10}
+            </h2>
+            <h3 className="question-text">{questions[currentQuestion].question}</h3>
 
-          {/* List of possible answers  */}
-          <ul>
-            {questions[currentQuestion].options.map((option) => {
-              return (
-                <li
-                  key={option.id}
-                  onClick={() => optionClicked(option.isCorrect)}
-                >
-                  {option.text}
-                </li>
-              );
-            })}
-          </ul>
-        </div>
-      )}
+            {/* List of possible answers  */}
+            <ul>
+
+              <li
+                onClick={() => optionClicked(true)}
+              >
+                {questions[currentQuestion].correct_answer}
+              </li>
+              <li
+                onClick={() => optionClicked(false)}
+              >
+                {questions[currentQuestion].incorrect_answers[0]}
+              </li>
+              <li
+                onClick={() => optionClicked(false)}
+              >
+                {questions[currentQuestion].incorrect_answers[1]}
+              </li>
+              <li
+                onClick={() => optionClicked(false)}
+              >
+                {questions[currentQuestion].incorrect_answers[2]}
+              </li>
+
+            </ul>
+          </div>
+        )}
     </div>
   );
-}
+};
 
 export default App;
